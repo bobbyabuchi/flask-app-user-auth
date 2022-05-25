@@ -22,16 +22,16 @@ def login():
         if user:
             if check_password_hash(user.password, password):
                 flash('Logged in successfully!', category='success')
-                login_user(user, remember="True")
+                login_user(user, remember=True)
                 return redirect(url_for('views.home'))
             else:
                 flash('Incorrect password, try again.', category='warning')
         else:
             flash('Email does not exist.', category='warning')
-    return render_template("login.html", text = "sample text for testing")
+    return render_template("login.html", user = current_user)
 
 @auth.route('/logout')
-@login_required
+@login_required # decorator -> don't access this function unless logged in
 def logout():
     logout_user()
     return redirect(url_for("auth.login"))
@@ -64,7 +64,8 @@ def sign_up():
             new_user = User(email=email, firstname=firstname, password=generate_password_hash(password, method='sha256'))
             db.session.add(new_user)
             db.session.commit()
+            login_user(user, remember=True)
             flash('Saved!', category = 'success')
             return redirect(url_for('views.home')) # views.home is better than /home, so that if you change it in views, it won't affect here
 
-    return render_template("sign_up.html")
+    return render_template("sign_up.html", user = current_user)
